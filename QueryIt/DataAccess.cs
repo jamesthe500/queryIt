@@ -21,7 +21,9 @@ namespace QueryIt
         int Commit();
     }
 
-    // we added that T has to be an IEntity as well. 
+    // class = force it to be a reference type
+    // struct = force it to be a value type like int or double.
+    // class, struct, or naming a class, e.g. "Person" have to come first, and there can be only one.
     public class SqlRepository<T> : IRepository<T> where T : class, IEntity
     {
         DbContext _ctx;
@@ -51,7 +53,7 @@ namespace QueryIt
 
         public void Delete(T entity)
         {
-            throw new NotImplementedException();
+            _set.Remove(entity);
         }
 
         public void Dispose()
@@ -66,7 +68,7 @@ namespace QueryIt
 
         public T FindById(int id)
         {
-            throw new NotImplementedException();
+            return _set.Find(id);
         }
     }
 }

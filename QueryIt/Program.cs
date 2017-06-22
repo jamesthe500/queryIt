@@ -11,20 +11,22 @@ namespace QueryIt
     {
         static void Main(string[] args)
         {
-            // tells the entity framework to drop and recreate the DB everytime the application runs.
-            // simpler that way.
+            
             Database.SetInitializer(new DropCreateDatabaseAlways<EmployeeDb>());
 
-            // this is a repository for employees. 
-            // it is created by constructing the concrete type SqlRepository<employee>
-            // a SqlRepositry needs a DbContext instance. Gives enough info to create teh schema 
-            // wrapped inusing because the object is disposable. 
+            
             using (IRepository<Employee> employeeRepository = new SqlRepository<Employee>(new EmployeeDb()))
             {
                 AddEmployees(employeeRepository);
                 CountEmployees(employeeRepository);
-
+                QueryEmployees(employeeRepository);
             }
+        }
+
+        private static void QueryEmployees(IRepository<Employee> employeeRepository)
+        {
+            var employee = employeeRepository.FindById(1);
+            Console.WriteLine(employee.Name); 
         }
 
         private static void CountEmployees(IRepository<Employee> employeeRepository)
