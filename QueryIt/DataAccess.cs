@@ -21,7 +21,8 @@ namespace QueryIt
         int Commit();
     }
 
-    public class SqlRepository<T> : IRepository<T> where T : class
+    // we added that T has to be an IEntity as well. 
+    public class SqlRepository<T> : IRepository<T> where T : class, IEntity
     {
         DbContext _ctx;
         DbSet<T> _set; 
@@ -33,7 +34,14 @@ namespace QueryIt
 
         public void Add(T newEntity)
         {
-            _set.Add(newEntity);
+            // here some validation would be nice, but because we're using generics,
+            // we can't do any type specific validation 
+            // a solution is to force T to impliment interfaces
+            // See Model.cs IEntity
+            if (newEntity.IsValid())
+            {
+                _set.Add(newEntity);
+            }
         }
 
         public int Commit()
@@ -53,9 +61,6 @@ namespace QueryIt
 
         public IQueryable<T> FindAll()
         {
-            // simple code. 
-            // _set is a DBSet<T>, implements IQueryable<T>.
-            // This allows us to still use LINQ Operators.
             return _set;
         }
 
