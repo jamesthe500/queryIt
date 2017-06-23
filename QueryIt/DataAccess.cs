@@ -12,12 +12,7 @@ namespace QueryIt
         public DbSet<Employee> Employees { get; set; } 
     }
 
-    // this interface is making it possible for ___ to be co-variant.
-    // we want the method in Program, DumpPeople, to be able to handle IRepository<Person> as well as <Employee>
-    // even though every Employee derives from a Person object, this isn't allowed by default.
-    // If it's reading Persons, that's fine, but if it tries to write to a Person, 
-    // it might use members unique to Employee objects. 
-    // We've pulled the methods that return items of type T or IQueryable<T>
+    
     public  interface IReadOnlyRepository<out T> : IDisposable
     {
         T FindById(int id);
@@ -25,13 +20,19 @@ namespace QueryIt
 
     }
 
-    // this is not covaiant, but the one above is
-    // so we add it to the inheritance list.
-    public interface IRepository<T> : IReadOnlyRepository<T>, IDisposable
+    // for contravaiance, all the writing methods are brought into this one.
+    // the IRepository is left inherting from these two. 
+    // it doesn't need to say it's an IDisposable, since it picks that up from th others.
+    public interface IWriteOnlyRepository<in T> : IDisposable
     {
         void Add(T newEntity);
         void Delete(T entity);
         int Commit();
+    }
+
+    public interface IRepository<T> : IReadOnlyRepository<T>, IWriteOnlyRepository<T>
+    {
+        
     }
 
     

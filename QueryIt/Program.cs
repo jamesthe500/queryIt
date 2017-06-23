@@ -18,16 +18,21 @@ namespace QueryIt
             using (IRepository<Employee> employeeRepository = new SqlRepository<Employee>(new EmployeeDb()))
             {
                 AddEmployees(employeeRepository);
+                AddManagers(employeeRepository);
                 CountEmployees(employeeRepository);
                 QueryEmployees(employeeRepository);
                 DumpPeople(employeeRepository);
             }
         }
 
-        // this method added to demonstrate covatiance.
-        // wanted to use an interface to handle both Person and Employee repositories,
-        // It would follow that since all Employees are People, it should be a simple matter
-        // but it wasn't. Solution in DataAccess.
+        // in order to write a manager to an employeeRepository, 
+        // we needed a differnet interface. This is contravaiance. 
+        private static void AddManagers(IWriteOnlyRepository<Manager> employeeRepository)
+        {
+            employeeRepository.Add(new Manager { Name = "Alex" });
+            employeeRepository.Commit();
+        }
+
         private static void DumpPeople(IReadOnlyRepository<Person> employeeRepository)
         {
             var employees = employeeRepository.FindAll();
