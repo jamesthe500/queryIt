@@ -20,6 +20,20 @@ namespace QueryIt
                 AddEmployees(employeeRepository);
                 CountEmployees(employeeRepository);
                 QueryEmployees(employeeRepository);
+                DumpPeople(employeeRepository);
+            }
+        }
+
+        // this method added to demonstrate covatiance.
+        // wanted to use an interface to handle both Person and Employee repositories,
+        // It would follow that since all Employees are People, it should be a simple matter
+        // but it wasn't. Solution in DataAccess.
+        private static void DumpPeople(IReadOnlyRepository<Person> employeeRepository)
+        {
+            var employees = employeeRepository.FindAll();
+            foreach (var employee in employees)
+            {
+                Console.WriteLine(employee.Name );
             }
         }
 

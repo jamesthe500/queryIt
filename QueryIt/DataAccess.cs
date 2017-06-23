@@ -12,18 +12,29 @@ namespace QueryIt
         public DbSet<Employee> Employees { get; set; } 
     }
 
-    public interface IRepository<T> : IDisposable
+    // this interface is making it possible for ___ to be co-variant.
+    // we want the method in Program, DumpPeople, to be able to handle IRepository<Person> as well as <Employee>
+    // even though every Employee derives from a Person object, this isn't allowed by default.
+    // If it's reading Persons, that's fine, but if it tries to write to a Person, 
+    // it might use members unique to Employee objects. 
+    // We've pulled the methods that return items of type T or IQueryable<T>
+    public  interface IReadOnlyRepository<out T> : IDisposable
+    {
+        T FindById(int id);
+        IQueryable<T> FindAll();
+
+    }
+
+    // this is not covaiant, but the one above is
+    // so we add it to the inheritance list.
+    public interface IRepository<T> : IReadOnlyRepository<T>, IDisposable
     {
         void Add(T newEntity);
         void Delete(T entity);
-        T FindById(int id);
-        IQueryable<T> FindAll();
         int Commit();
     }
 
-    // class = force it to be a reference type
-    // struct = force it to be a value type like int or double.
-    // class, struct, or naming a class, e.g. "Person" have to come first, and there can be only one.
+    
     public class SqlRepository<T> : IRepository<T> where T : class, IEntity
     {
         DbContext _ctx;
@@ -36,10 +47,6 @@ namespace QueryIt
 
         public void Add(T newEntity)
         {
-            // here some validation would be nice, but because we're using generics,
-            // we can't do any type specific validation 
-            // a solution is to force T to impliment interfaces
-            // See Model.cs IEntity
             if (newEntity.IsValid())
             {
                 _set.Add(newEntity);
